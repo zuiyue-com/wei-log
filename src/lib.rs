@@ -18,7 +18,7 @@ pub fn log(s: &str) {
 macro_rules! info {
     ($($arg:tt)*) => {{
         let message = format!($($arg)*);
-        crate::ai_log::log(&message); // 将格式化后的字符串传递给函数
+        crate::wei_log::log(&message); // 将格式化后的字符串传递给函数
         println!("{}", message);
     }}
 }
@@ -28,7 +28,7 @@ macro_rules! error {
     ($($arg:tt)*) => {{
         let message = format!($($arg)*);
         let message = format!("错误: {}", message);
-        crate::ai_log::log(&message); // 将格式化后的字符串传递给函数
+        crate::wei_log::log(&message); // 将格式化后的字符串传递给函数
         println!("{}", message);
     }}
 }
@@ -37,7 +37,7 @@ macro_rules! error {
 macro_rules! info_println {
     ($($arg:tt)*) => {{
         let message = format!($($arg)*);
-        crate::ai_log::log(&message); // 将格式化后的字符串传递给函数
+        crate::wei_log::log(&message); // 将格式化后的字符串传递给函数
         println!("{}", message);
     }}
 }
@@ -46,7 +46,7 @@ macro_rules! info_println {
 macro_rules! info_print {
     ($($arg:tt)*) => {{
         let message = format!($($arg)*);
-        crate::ai_log::log(&message); // 将格式化后的字符串传递给函数
+        crate::wei_log::log(&message); // 将格式化后的字符串传递给函数
         print!("{}", message);
     }}
 }
