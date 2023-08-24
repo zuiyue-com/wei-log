@@ -19,7 +19,7 @@ macro_rules! info {
     ($($arg:tt)*) => {{
         let message = format!($($arg)*);
         crate::wei_log::log(&message); // 将格式化后的字符串传递给函数
-        println!("{}", message);
+        // println!("{}", message);
     }}
 }
 
@@ -29,7 +29,7 @@ macro_rules! error {
         let message = format!($($arg)*);
         let message = format!("错误: {}", message);
         crate::wei_log::log(&message); // 将格式化后的字符串传递给函数
-        println!("{}", message);
+        // println!("{}", message);
     }}
 }
 
@@ -38,7 +38,7 @@ macro_rules! info_println {
     ($($arg:tt)*) => {{
         let message = format!($($arg)*);
         crate::wei_log::log(&message); // 将格式化后的字符串传递给函数
-        println!("{}", message);
+        // println!("{}", message);
     }}
 }
 
@@ -47,7 +47,7 @@ macro_rules! info_print {
     ($($arg:tt)*) => {{
         let message = format!($($arg)*);
         crate::wei_log::log(&message); // 将格式化后的字符串传递给函数
-        print!("{}", message);
+        // print!("{}", message);
     }}
 }
 
