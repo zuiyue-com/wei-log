@@ -6,7 +6,7 @@ pub fn log(s: &str) {
     if cfg!(target_os = "windows") {
         path = format!("{}/AppData/Local/wei/log.txt", home_dir);
     } else {
-        path = format!("~/.wei/wei-log.txt");
+        path = format!("{}/.wei/wei-log.txt", home_dir);
     }
     let local: DateTime<Local> = Local::now();
     let data = format!("{} {}",local.format("%Y-%m-%d %H:%M"), s);
