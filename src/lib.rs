@@ -1,17 +1,20 @@
 use chrono::prelude::*;
 
 pub fn log(s: &str) {
+    let path = env::current_exe().unwrap();
+    let filename = Path::new(&path).file_name().unwrap().to_str().unwrap();
+
     let home_dir = get_home_dir().unwrap_or_else(|| String::from("."));
     let path;
     if cfg!(target_os = "windows") {
-        path = format!("{}/AppData/Local/wei/log.txt", home_dir);
+        path = format!("{}/AppData/Local/wei/{}.log.txt", home_dir, filename);
     } else {
-        path = format!("{}/.wei/wei-log.txt", home_dir);
+        path = format!("{}/.wei/{}.log.txt", home_dir, filename);
     }
     let local: DateTime<Local> = Local::now();
     let data = format!("{} {}",local.format("%Y-%m-%d %H:%M"), s);
 
-    let _ = write_and_prune_file(&path, &data, 5000);
+    let _ = write_and_prune_file(&path, &data, 100);
 }
 
 #[macro_export]
