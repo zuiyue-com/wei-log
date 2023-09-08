@@ -1,8 +1,8 @@
 use chrono::prelude::*;
 
 pub fn log(s: &str) {
-    let path = env::current_exe().unwrap();
-    let filename = Path::new(&path).file_name().unwrap().to_str().unwrap();
+    let path = std::env::current_exe().unwrap();
+    let filename = std::path::Path::new(&path).file_name().unwrap().to_str().unwrap();
 
     let home_dir = get_home_dir().unwrap_or_else(|| String::from("."));
     let path;
