@@ -1,7 +1,7 @@
 use chrono::prelude::*;
 
 use std::fs::{OpenOptions};
-use std::io::{BufReader, BufRead, Write, Seek, SeekFrom};
+use std::io::{BufReader, BufRead, BufWriter, Write, Seek, SeekFrom};
 use std::env;
 pub fn log(s: &str) {
     let path = std::env::current_exe().unwrap();
@@ -19,18 +19,18 @@ pub fn log(s: &str) {
 
     // let _ = write_and_prune_file(&path, &data, 100);
 
-    // 往文件后面追加，并限制文件最多300行
     let mut file = OpenOptions::new().read(true).write(true).create(true).open(&path).unwrap();
     let reader = BufReader::new(&file);
     let mut lines: Vec<String> = reader.lines().collect::<Result<_, _>>().unwrap();
-    if lines.len() >= 100 {
-        lines.remove(lines.len() - 1);
+    lines.push(data);
+    if lines.len() > 100 {
+        lines.remove(0);
     }
-    lines.insert(0, data);
     file.seek(SeekFrom::Start(0)).unwrap();
     file.set_len(0).unwrap();  // Truncate the file
+    let mut writer = BufWriter::new(&file);
     for line in &lines {
-        writeln!(file, "{}", line).unwrap();
+        writeln!(writer, "{}", line).unwrap();
     }
 
 }
