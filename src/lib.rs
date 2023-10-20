@@ -1,5 +1,8 @@
 use chrono::prelude::*;
 
+use std::fs::{OpenOptions};
+use std::io::{BufReader, BufRead, Write, Seek, SeekFrom};
+use std::env;
 pub fn log(s: &str) {
     let path = std::env::current_exe().unwrap();
     let filename = std::path::Path::new(&path).file_name().unwrap().to_str().unwrap();
@@ -14,7 +17,22 @@ pub fn log(s: &str) {
     let local: DateTime<Local> = Local::now();
     let data = format!("{} {}",local.format("%Y-%m-%d %H:%M"), s);
 
-    let _ = write_and_prune_file(&path, &data, 100);
+    // let _ = write_and_prune_file(&path, &data, 100);
+
+    // 往文件后面追加，并限制文件最多300行
+    let mut file = OpenOptions::new().read(true).write(true).create(true).open(&path).unwrap();
+    let reader = BufReader::new(&file);
+    let mut lines: Vec<String> = reader.lines().collect::<Result<_, _>>().unwrap();
+    if lines.len() >= 100 {
+        lines.remove(lines.len() - 1);
+    }
+    lines.insert(0, data);
+    file.seek(SeekFrom::Start(0)).unwrap();
+    file.set_len(0).unwrap();  // Truncate the file
+    for line in &lines {
+        writeln!(file, "{}", line).unwrap();
+    }
+
 }
 
 #[macro_export]
@@ -63,33 +81,31 @@ fn get_home_dir() -> Option<String> {
     }
 }
 
-use std::fs::{OpenOptions};
-use std::io::{BufReader, BufRead, Write, Seek, SeekFrom};
-use std::env;
 
-fn write_and_prune_file(path: &str, content: &str, max_lines: usize) -> std::io::Result<()> {
-    let mut file = OpenOptions::new().read(true).write(true).create(true).open(path)?;
 
-    // Step 1: Read all lines
-    let reader = BufReader::new(&file);
-    let mut lines: Vec<String> = reader.lines().collect::<Result<_, _>>()?;
+// fn write_and_prune_file(path: &str, content: &str, max_lines: usize) -> std::io::Result<()> {
+//     let mut file = OpenOptions::new().read(true).write(true).create(true).open(path)?;
 
-    // Step 2: Prune lines if necessary
-    if lines.len() >= max_lines {
-        lines.remove(lines.len() - 1);
-    }
+//     // Step 1: Read all lines
+//     let reader = BufReader::new(&file);
+//     let mut lines: Vec<String> = reader.lines().collect::<Result<_, _>>()?;
 
-    // Step 3: Insert new line at the top
-    lines.insert(0, content.to_string());
+//     // Step 2: Prune lines if necessary
+//     if lines.len() >= max_lines {
+//         lines.remove(lines.len() - 1);
+//     }
 
-    // Step 4: Seek to the start of the file and write all lines
-    file.seek(SeekFrom::Start(0))?;
-    file.set_len(0)?;  // Truncate the file
-    for line in &lines {
-        writeln!(file, "{}", line)?;
-    }
-    Ok(())
-}
+//     // Step 3: Insert new line at the top
+//     lines.insert(0, content.to_string());
+
+//     // Step 4: Seek to the start of the file and write all lines
+//     file.seek(SeekFrom::Start(0))?;
+//     file.set_len(0)?;  // Truncate the file
+//     for line in &lines {
+//         writeln!(file, "{}", line)?;
+//     }
+//     Ok(())
+// }
 
 
 
