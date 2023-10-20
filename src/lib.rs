@@ -17,22 +17,25 @@ pub fn log(s: &str) {
     let local: DateTime<Local> = Local::now();
     let data = format!("{} {}",local.format("%Y-%m-%d %H:%M"), s);
 
-    // let _ = write_and_prune_file(&path, &data, 100);
 
-    let mut file = OpenOptions::new().read(true).write(true).create(true).open(&path).unwrap();
-    let reader = BufReader::new(&file);
-    let mut lines: Vec<String> = reader.lines().collect::<Result<_, _>>().unwrap();
-    lines.push(data);
-    if lines.len() > 100 {
-        lines.remove(0);
-    }
-    file.seek(SeekFrom::Start(0)).unwrap();
-    file.set_len(0).unwrap();  // Truncate the file
-    let mut writer = BufWriter::new(&file);
-    for line in &lines {
-        writeln!(writer, "{}", line).unwrap();
-    }
+    #[cfg(target_os = "windows")] 
+    write_and_prune_file(&path, &data, 100).unwrap();
 
+    #[cfg(not(target_os = "windows"))] {
+        let mut file = OpenOptions::new().read(true).write(true).create(true).open(&path).unwrap();
+        let reader = BufReader::new(&file);
+        let mut lines: Vec<String> = reader.lines().collect::<Result<_, _>>().unwrap();
+        lines.push(data);
+        if lines.len() > 100 {
+            lines.remove(0);
+        }
+        file.seek(SeekFrom::Start(0)).unwrap();
+        file.set_len(0).unwrap();  // Truncate the file
+        let mut writer = BufWriter::new(&file);
+        for line in &lines {
+            writeln!(writer, "{}", line).unwrap();
+        }
+    }
 }
 
 #[macro_export]
@@ -83,29 +86,29 @@ fn get_home_dir() -> Option<String> {
 
 
 
-// fn write_and_prune_file(path: &str, content: &str, max_lines: usize) -> std::io::Result<()> {
-//     let mut file = OpenOptions::new().read(true).write(true).create(true).open(path)?;
+fn write_and_prune_file(path: &str, content: &str, max_lines: usize) -> std::io::Result<()> {
+    let mut file = OpenOptions::new().read(true).write(true).create(true).open(path)?;
 
-//     // Step 1: Read all lines
-//     let reader = BufReader::new(&file);
-//     let mut lines: Vec<String> = reader.lines().collect::<Result<_, _>>()?;
+    // Step 1: Read all lines
+    let reader = BufReader::new(&file);
+    let mut lines: Vec<String> = reader.lines().collect::<Result<_, _>>()?;
 
-//     // Step 2: Prune lines if necessary
-//     if lines.len() >= max_lines {
-//         lines.remove(lines.len() - 1);
-//     }
+    // Step 2: Prune lines if necessary
+    if lines.len() >= max_lines {
+        lines.remove(lines.len() - 1);
+    }
 
-//     // Step 3: Insert new line at the top
-//     lines.insert(0, content.to_string());
+    // Step 3: Insert new line at the top
+    lines.insert(0, content.to_string());
 
-//     // Step 4: Seek to the start of the file and write all lines
-//     file.seek(SeekFrom::Start(0))?;
-//     file.set_len(0)?;  // Truncate the file
-//     for line in &lines {
-//         writeln!(file, "{}", line)?;
-//     }
-//     Ok(())
-// }
+    // Step 4: Seek to the start of the file and write all lines
+    file.seek(SeekFrom::Start(0))?;
+    file.set_len(0)?;  // Truncate the file
+    for line in &lines {
+        writeln!(file, "{}", line)?;
+    }
+    Ok(())
+}
 
 
 
