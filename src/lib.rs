@@ -10,13 +10,17 @@ pub fn log(s: &str) {
     let home_dir = get_home_dir().unwrap_or_else(|| String::from("."));
     let path;
     if cfg!(target_os = "windows") {
-        path = format!("{}/AppData/Local/wei/{}.log.txt", home_dir, filename);
+        path = format!("{}/AppData/Local/Wei/{}.log.txt", home_dir, filename);
     } else {
         path = format!("{}/.wei/{}.log.txt", home_dir, filename);
     }
+
+    if !std::path::Path::new(&path).exists() {
+        std::fs::create_dir_all(std::path::Path::new(&path).parent().unwrap()).unwrap();
+    }
+
     let local: DateTime<Local> = Local::now();
     let data = format!("{} {}",local.format("%Y-%m-%d %H:%M"), s);
-
 
     #[cfg(target_os = "windows")] 
     write_and_prune_file(&path, &data, 100).unwrap();
@@ -83,8 +87,6 @@ fn get_home_dir() -> Option<String> {
         env::var("HOME").ok()
     }
 }
-
-
 
 fn write_and_prune_file(path: &str, content: &str, max_lines: usize) -> std::io::Result<()> {
     let mut file = OpenOptions::new().read(true).write(true).create(true).open(path)?;
