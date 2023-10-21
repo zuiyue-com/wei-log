@@ -1,7 +1,7 @@
 use chrono::prelude::*;
 
 use std::fs::{OpenOptions};
-use std::io::{BufReader, BufRead, BufWriter, Write, Seek, SeekFrom};
+use std::io::{BufReader, BufRead, Write, Seek, SeekFrom};
 use std::env;
 pub fn log(s: &str) {
     let path = std::env::current_exe().unwrap();
@@ -35,7 +35,7 @@ pub fn log(s: &str) {
         }
         file.seek(SeekFrom::Start(0)).unwrap();
         file.set_len(0).unwrap();  // Truncate the file
-        let mut writer = BufWriter::new(&file);
+        let mut writer = std::io::BufWriter::new(&file);
         for line in &lines {
             writeln!(writer, "{}", line).unwrap();
         }
