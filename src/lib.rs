@@ -1,4 +1,5 @@
 use chrono::prelude::*;
+use fs2::FileExt;
 
 use std::fs::{OpenOptions};
 use std::io::{BufReader, BufRead, Write, Seek, SeekFrom};
@@ -91,6 +92,8 @@ fn get_home_dir() -> Option<String> {
 fn write_and_prune_file(path: &str, content: &str, max_lines: usize) -> std::io::Result<()> {
     let mut file = OpenOptions::new().read(true).write(true).create(true).open(path)?;
 
+    file.lock_exclusive()?;
+
     // Step 1: Read all lines
     let reader = BufReader::new(&file);
     let mut lines: Vec<String> = reader.lines().collect::<Result<_, _>>()?;
@@ -109,6 +112,9 @@ fn write_and_prune_file(path: &str, content: &str, max_lines: usize) -> std::io:
     for line in &lines {
         writeln!(file, "{}", line)?;
     }
+
+    file.unlock()?;
+
     Ok(())
 }
 
