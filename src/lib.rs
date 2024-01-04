@@ -24,14 +24,14 @@ pub fn log(s: &str) {
     let data = format!("{} {}",local.format("%Y-%m-%d %H:%M"), s);
 
     #[cfg(target_os = "windows")] 
-    write_and_prune_file(&path, &data, 100).unwrap();
+    write_and_prune_file(&path, &data, 10000).unwrap();
 
     #[cfg(not(target_os = "windows"))] {
         let mut file = OpenOptions::new().read(true).write(true).create(true).open(&path).unwrap();
         let reader = BufReader::new(&file);
         let mut lines: Vec<String> = reader.lines().collect::<Result<_, _>>().unwrap();
         lines.push(data);
-        if lines.len() > 100 {
+        if lines.len() > 10000 {
             lines.remove(0);
         }
         file.seek(SeekFrom::Start(0)).unwrap();
