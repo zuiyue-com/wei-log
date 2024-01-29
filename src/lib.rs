@@ -17,28 +17,49 @@ pub fn log(s: &str) {
     }
 
     if !std::path::Path::new(&path).exists() {
-        std::fs::create_dir_all(std::path::Path::new(&path).parent().unwrap()).unwrap();
+        match std::fs::create_dir_all(std::path::Path::new(&path).parent().unwrap()) {
+            Ok(_) => (),
+            Err(_) => return,
+        };
     }
 
     let local: DateTime<Local> = Local::now();
     let data = format!("{} {}",local.format("%Y-%m-%d %H:%M"), s);
 
     #[cfg(target_os = "windows")] 
-    write_and_prune_file(&path, &data, 10000).unwrap();
+    match write_and_prune_file(&path, &data, 10000) {
+        Ok(_) => (),
+        Err(_) => return,
+    };
 
     #[cfg(not(target_os = "windows"))] {
-        let mut file = OpenOptions::new().read(true).write(true).create(true).open(&path).unwrap();
+        let mut file = match OpenOptions::new().read(true).write(true).create(true).open(&path) {
+            Ok(file) => file,
+            Err(_) => return,
+        };
         let reader = BufReader::new(&file);
-        let mut lines: Vec<String> = reader.lines().collect::<Result<_, _>>().unwrap();
+        let mut lines: Vec<String> = match reader.lines().collect::<Result<_, _>>() {
+            Ok(lines) => lines,
+            Err(_) => return,
+        };
         lines.push(data);
         if lines.len() > 10000 {
             lines.remove(0);
         }
-        file.seek(SeekFrom::Start(0)).unwrap();
-        file.set_len(0).unwrap();  // Truncate the file
+        match file.seek(SeekFrom::Start(0)) {
+            Ok(_) => (),
+            Err(_) => return,
+        };
+        match file.set_len(0) {
+            Ok(_) => (),
+            Err(_) => return,
+        };  // Truncate the file
         let mut writer = std::io::BufWriter::new(&file);
         for line in &lines {
-            writeln!(writer, "{}", line).unwrap();
+            match writeln!(writer, "{}", line) {
+                Ok(_) => (),
+                Err(_) => return,
+            };
         }
     }
 }
